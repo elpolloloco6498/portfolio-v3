@@ -8,62 +8,83 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Bloomberg Terminal -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Midnight Cyber -->
     <!-- Application Structure Plan: A single-page, vertical-scrolling application designed to guide users through a narrative of discovery. The structure flows from a high-level identity (Hero), to core philosophy (About), to tangible proof (Toolkit, Portfolio, Experience), and finally to unique differentiators (Deep Dive). This non-linear, thematic structure was chosen over a simple resume format to better tell a compelling story, allowing users like recruiters or potential clients to explore sections based on their interests (e.g., filtering projects by "AI") while maintaining a clear narrative flow. Key interactions include tabbed skill exploration and a filterable project gallery with modals for detailed case studies, enhancing user engagement and information accessibility. -->
     <!-- Visualization & Content Choices: The application translates the report's qualitative analysis into interactive components. 1) Skill Set: Goal is to inform and compare. Instead of a static list, this is presented as interactive tabs for each skill category (Frontend, AI, etc.) and a radar chart (using Chart.js) to visually represent the synergy and depth of his skills. This provides a quick, high-level understanding. 2) Portfolio: Goal is to organize and provide evidence. A filterable grid of project cards is used. Clicking a card opens a modal with a detailed case study (Challenge, Solution, Tech Stack). This allows users to self-select the proof points most relevant to them. 3) Unique Differentiators: Goal is to highlight and impress. The "Creative Technologist" and "Scientist-Engineer" aspects are given their own dedicated section with clear descriptions and external links for verification. This isolates and emphasizes his strongest, most unique value propositions. These choices are designed for usability and interactive storytelling. -->
     <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
     <style>
         body {
-            font-family: 'Roboto Mono', monospace;
-            background-color: #000000;
-            color: #E0E0E0;
-            text-transform: uppercase;
-        }
-        .terminal-panel {
-            background-color: #000000;
-            border: 1px solid #FF9900;
+            font-family: 'Inter', sans-serif;
+            background-color: #030712; /*-gray-950*/
+            color: #d1d5db; /*-gray-300*/
         }
         .nav-link {
-            transition: background-color 0.2s, color 0.2s;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #6366f1; /*-indigo-500*/
+            transition: width 0.3s ease;
         }
         .nav-link:hover, .nav-link.active {
-            background-color: #FF9900;
-            color: #000000;
+            color: #e5e7eb; /*-gray-200*/
+        }
+        .nav-link:hover::after, .nav-link.active::after {
+            width: 100%;
+        }
+        .glass-card {
+            background: rgba(17, 24, 39, 0.5); /*-gray-900/50*/
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(55, 65, 81, 0.4); /*-gray-700/40*/
+            transition: background 0.3s ease, border-color 0.3s ease, transform 0.3s ease;
+        }
+        .glass-card:hover {
+            transform: translateY(-5px);
+            background: rgba(31, 41, 55, 0.5); /*-gray-800/50*/
+            border-color: rgba(79, 70, 229, 0.5); /*-indigo-600/50*/
         }
         .modal-bg {
-            background-color: rgba(0, 0, 0, 0.8);
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
         }
         .tag {
-            background-color: #522d00;
-            color: #FF9900;
-            border: 1px solid #FF9900;
+            background-color: #374151; /*-gray-700*/
+            color: #c7d2fe; /*-indigo-200*/
         }
         .btn-primary {
-            background-color: #FF9900;
-            color: #000000;
-            border: 1px solid #FF9900;
-            transition: background-color 0.2s, color 0.2s;
+            background-color: #4f46e5; /*-indigo-600*/
+            color: #FFFFFF;
+            transition: background-color 0.3s ease;
         }
         .btn-primary:hover {
-            background-color: #000000;
-            color: #FF9900;
+            background-color: #6366f1; /*-indigo-500*/
         }
         .btn-secondary {
             background-color: transparent;
-            color: #FF9900;
-            border: 1px solid #FF9900;
-            transition: background-color 0.2s, color 0.2s;
+            color: #e5e7eb; /*-gray-200*/
+            border: 1px solid #4b5563; /*-gray-600*/
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
         }
         .btn-secondary.active, .btn-secondary:hover {
-            background-color: #FF9900;
-            color: #000000;
+            background-color: #4f46e5; /*-indigo-600*/
+            color: #FFFFFF;
+            border-color: #4f46e5; /*-indigo-600*/
         }
         .section-title {
-            color: #FFFFFF;
+            color: #e5e7eb; /*-gray-200*/
         }
         .section-title span {
-            color: #FF9900;
+            color: #6366f1; /*-indigo-500*/
         }
         .chart-container {
             position: relative;
@@ -79,100 +100,122 @@
                 height: 400px;
             }
         }
-        .blinking-cursor {
-            display: inline-block;
-            width: 10px;
-            height: 1.2em;
-            background-color: #FF9900;
-            animation: blink 1s step-end infinite;
-            vertical-align: bottom;
+        .grid-bg {
+            background-image:
+                linear-gradient(to right, rgba(55, 65, 81, 0.2) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(55, 65, 81, 0.2) 1px, transparent 1px);
+            background-size: 40px 40px;
         }
-        @keyframes blink {
-            50% { opacity: 0; }
+        .hero-bg {
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-bg::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 150%;
+            height: 150%;
+            background: radial-gradient(circle, rgba(79, 70, 229, 0.15) 0%, rgba(79, 70, 229, 0) 60%);
+            animation: pulse 8s infinite ease-in-out;
+            transform: translate(-50%, -50%);
+        }
+        @keyframes pulse {
+            0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.7; }
+            50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+            100% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.7; }
         }
     </style>
 </head>
 <body class="antialiased">
 
-    <header id="header" class="bg-black/80 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-orange-500/50">
-        <nav class="container mx-auto px-6 py-3 flex justify-between items-center">
-            <a href="#" class="text-xl font-bold text-orange-400">ISHAM.EXE</a>
-            <div class="hidden md:flex items-center space-x-1">
-                <a href="#about" class="nav-link text-gray-300 px-3 py-1">F1 ABOUT</a>
-                <a href="#toolkit" class="nav-link text-gray-300 px-3 py-1">F2 TOOLKIT</a>
-                <a href="#portfolio" class="nav-link text-gray-300 px-3 py-1">F3 PORTFOLIO</a>
-                <a href="#experience" class="nav-link text-gray-300 px-3 py-1">F4 EXPERIENCE</a>
-                <a href="#contact" class="nav-link text-gray-300 px-3 py-1">F5 CONTACT</a>
+    <header id="header" class="bg-gray-950/50 backdrop-blur-lg fixed top-0 left-0 right-0 z-50 transition-all duration-300 border-b border-gray-800/50">
+        <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="text-xl font-bold text-white">Isham Le Tenoux</a>
+            <div class="hidden md:flex items-center space-x-8">
+                <a href="#about" class="nav-link text-gray-400">About</a>
+                <a href="#toolkit" class="nav-link text-gray-400">Toolkit</a>
+                <a href="#portfolio" class="nav-link text-gray-400">Portfolio</a>
+                <a href="#experience" class="nav-link text-gray-400">Experience</a>
+                <a href="#contact" class="btn-primary rounded-lg px-4 py-2 text-sm font-semibold">Contact</a>
             </div>
-            <button id="mobile-menu-button" class="md:hidden focus:outline-none text-orange-400 text-2xl font-bold">
-                MENU
+            <button id="mobile-menu-button" class="md:hidden focus:outline-none">
+                <svg class="w-6 h-6 text-gray-400" fill="none" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" stroke="currentColor">
+                    <path d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
             </button>
         </nav>
-        <div id="mobile-menu" class="hidden md:hidden bg-black/90 backdrop-blur-sm">
-            <a href="#about" class="block py-2 px-6 text-sm text-gray-300 hover:bg-orange-500 hover:text-black">F1 ABOUT</a>
-            <a href="#toolkit" class="block py-2 px-6 text-sm text-gray-300 hover:bg-orange-500 hover:text-black">F2 TOOLKIT</a>
-            <a href="#portfolio" class="block py-2 px-6 text-sm text-gray-300 hover:bg-orange-500 hover:text-black">F3 PORTFOLIO</a>
-            <a href="#experience" class="block py-2 px-6 text-sm text-gray-300 hover:bg-orange-500 hover:text-black">F4 EXPERIENCE</a>
-            <a href="#contact" class="block py-2 px-6 text-sm text-gray-300 hover:bg-orange-500 hover:text-black">F5 CONTACT</a>
+        <div id="mobile-menu" class="hidden md:hidden bg-gray-900/80 backdrop-blur-lg">
+            <a href="#about" class="block py-3 px-6 text-sm text-gray-300 hover:bg-gray-800">About</a>
+            <a href="#toolkit" class="block py-3 px-6 text-sm text-gray-300 hover:bg-gray-800">Toolkit</a>
+            <a href="#portfolio" class="block py-3 px-6 text-sm text-gray-300 hover:bg-gray-800">Portfolio</a>
+            <a href="#experience" class="block py-3 px-6 text-sm text-gray-300 hover:bg-gray-800">Experience</a>
+            <a href="#contact" class="block py-3 px-6 text-sm text-gray-300 hover:bg-gray-800">Contact</a>
         </div>
     </header>
 
     <main>
-        <section id="home" class="min-h-screen flex items-center pt-20">
+        <section id="home" class="min-h-screen flex items-center pt-20 hero-bg grid-bg">
             <div class="container mx-auto px-6 z-10">
                 <div class="flex flex-col md:flex-row items-center justify-center text-center md:text-left">
                     <div class="relative mb-6 md:mb-0 md:mr-10 flex-shrink-0">
-                        <img src="https://ishamletenoux.com/assets/portrait.jpg" alt="Isham Le Tenoux" class="w-40 h-40 border-2 border-orange-500 grayscale">
+                        <img src="https://ishamletenoux.com/assets/portrait.jpg" alt="Isham Le Tenoux" class="w-40 h-40 rounded-full border-4 border-gray-800 shadow-lg">
+                        <div class="absolute inset-0 rounded-full border-2 border-indigo-500/50 animate-pulse"></div>
                     </div>
                     <div>
-                        <h1 class="text-3xl md:text-5xl font-bold text-white leading-tight">
-                            <span class="text-orange-400">></span> ARCHITECT OF INTELLIGENT AUTOMATION<span class="blinking-cursor"></span>
-                        </h1>
-                        <p class="mt-4 text-lg text-gray-400 max-w-3xl mx-auto md:mx-0">
-                            I DESIGN AND BUILD CUSTOM SOFTWARE AND AI-POWERED AUTOMATIONS THAT INCREASE EFFICIENCY, SOLVE COMPLEX PROBLEMS, AND DRIVE BUSINESS GROWTH.
+                        <h1 class="text-4xl md:text-6xl font-bold text-white leading-tight">Architect of <span class="text-indigo-400">Intelligent Automation</span></h1>
+                        <p class="mt-4 text-lg md:text-xl text-gray-400 max-w-3xl mx-auto md:mx-0">
+                            I design and build custom software and AI-powered automations that increase efficiency, solve complex problems, and drive business growth.
                         </p>
                         <div class="mt-8 flex justify-center md:justify-start space-x-4">
-                            <a href="#portfolio" class="btn-primary px-6 py-2 font-bold">LOAD PORTFOLIO</a>
-                            <a href="#contact" class="btn-secondary px-6 py-2 font-bold">INITIATE CONTACT</a>
+                            <a href="#portfolio" class="btn-primary rounded-lg px-8 py-3 font-semibold">View My Work</a>
+                            <a href="#contact" class="btn-secondary rounded-lg px-8 py-3 font-semibold">Get In Touch</a>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="about" class="py-20 md:py-32">
+        <section id="about" class="py-20 md:py-32 grid-bg">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-16">
-                    <h2 class="text-3xl md:text-4xl font-bold section-title">[ A <span>BUILDER'S</span> PHILOSOPHY ]</h2>
-                    <p class="mt-4 text-lg text-gray-400 max-w-3xl mx-auto">MY APPROACH IS ROOTED IN THE COMPREHENSIVE ACT OF CREATION. I DON'T JUST WRITE CODE; I ARCHITECT AND BUILD COMPLETE, END-TO-END SOLUTIONS THAT TRANSFORM AN IDEA INTO A TANGIBLE, VALUE-CREATING REALITY.</p>
+                    <h2 class="text-3xl md:text-4xl font-bold section-title">A <span>Builder's</span> Philosophy</h2>
+                    <p class="mt-4 text-lg text-gray-400 max-w-3xl mx-auto">My approach is rooted in the comprehensive act of creation. I don't just write code; I architect and build complete, end-to-end solutions that transform an idea into a tangible, value-creating reality.</p>
                 </div>
-                <div class="grid md:grid-cols-2 gap-8">
-                    <div class="text-center p-8 terminal-panel">
-                        <h3 class="text-xl font-bold mb-4 text-orange-400">FULL-STACK BUILDER</h3>
-                        <p class="text-gray-400">MASTERY OF THE ENTIRE TECHNOLOGY STACK, FROM BACKEND LOGIC WITH PYTHON AND DJANGO TO DYNAMIC, MODERN FRONTS WITH REACT AND NEXT.JS. I BUILD COMPLETE APPLICATIONS, NOT JUST COMPONENTS.</p>
+                <div class="grid md:grid-cols-2 gap-10">
+                    <div class="text-center p-8 glass-card rounded-xl">
+                        <div class="text-4xl text-indigo-400 mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2 text-white">Full-Stack Builder</h3>
+                        <p class="text-gray-400">Mastery of the entire technology stack, from backend logic with Python and Django to dynamic, modern frontends with React and Next.js. I build complete applications, not just components.</p>
                     </div>
-                    <div class="text-center p-8 terminal-panel">
-                        <h3 class="text-xl font-bold mb-4 text-orange-400">AUTOMATION & AI SPECIALIST</h3>
-                        <p class="text-gray-400">EXPERTISE IN CREATING OPERATIONAL AI AGENTS AND BUILDING INTELLIGENT AUTOMATION PIPELINES WITH PIPEDREAM, AWS, AND GCP TO SOLVE REAL-WORLD BUSINESS CHALLENGES.</p>
+                    <div class="text-center p-8 glass-card rounded-xl">
+                        <div class="text-4xl text-indigo-400 mb-4">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2 text-white">Automation & AI Specialist</h3>
+                        <p class="text-gray-400">Expertise in creating operational AI agents and building intelligent automation pipelines with Pipedream, AWS, and GCP to solve real-world business challenges.</p>
                     </div>
                 </div>
             </div>
         </section>
         
-        <section id="toolkit" class="py-20 md:py-32 bg-black">
+        <section id="toolkit" class="py-20 md:py-32 bg-gray-950/50 grid-bg">
             <div class="container mx-auto px-6">
                  <div class="text-center mb-16">
-                    <h2 class="text-3xl md:text-4xl font-bold section-title">[ MY INTEGRATED <span>TOOLKIT</span> ]</h2>
-                    <p class="mt-4 text-lg text-gray-400 max-w-3xl mx-auto">A COHESIVE SET OF TOOLS WHERE EACH COMPONENT ENHANCES THE OTHERS, ENABLING THE CREATION OF ROBUST AND SOPHISTICATED SYSTEMS.</p>
+                    <h2 class="text-3xl md:text-4xl font-bold section-title">My Integrated <span>Toolkit</span></h2>
+                    <p class="mt-4 text-lg text-gray-400 max-w-3xl mx-auto">This is more than a list of technologies; it's a cohesive set of tools where each component enhances the others, enabling the creation of robust and sophisticated systems.</p>
                 </div>
                 <div class="grid md:grid-cols-2 gap-12 items-center">
-                    <div class="terminal-panel p-4">
+                    <div>
                         <div class="chart-container">
                              <canvas id="skillsChart"></canvas>
                         </div>
                     </div>
-                    <div id="skills-container" class="terminal-panel p-6">
-                        <div class="mb-4 flex flex-wrap gap-2" id="skill-tabs">
+                    <div id="skills-container">
+                        <div class="mb-4 flex flex-wrap gap-2">
                         </div>
                         <div id="skills-content" class="grid grid-cols-2 sm:grid-cols-3 gap-4">
                         </div>
@@ -181,63 +224,65 @@
             </div>
         </section>
 
-        <section id="portfolio" class="py-20 md:py-32">
+        <section id="portfolio" class="py-20 md:py-32 grid-bg">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-16">
-                    <h2 class="text-3xl md:text-4xl font-bold section-title">[ PORTFOLIO: <span>EVIDENCE</span> OF EXECUTION ]</h2>
-                    <p class="mt-4 text-lg text-gray-400 max-w-3xl mx-auto">A BRAND IS BUILT ON PROMISES, BUT SOLIDIFIED BY PROOF. THESE PROJECTS DEMONSTRATE MY ABILITY TO ARCHITECT AND DELIVER COMPLETE, FUNCTIONAL PRODUCTS.</p>
+                    <h2 class="text-3xl md:text-4xl font-bold section-title">Portfolio: <span>Evidence</span> of Execution</h2>
+                    <p class="mt-4 text-lg text-gray-400 max-w-3xl mx-auto">A brand is built on promises, but solidified by proof. These projects demonstrate my ability to architect and deliver complete, functional products that solve real problems.</p>
                 </div>
                 <div class="flex justify-center flex-wrap gap-2 mb-8" id="portfolio-filters">
-                    <button class="btn-filter active btn-secondary px-4 py-1.5 text-sm" data-filter="all">ALL</button>
-                    <button class="btn-filter btn-secondary px-4 py-1.5 text-sm" data-filter="AI & Automation">AI & AUTOMATION</button>
-                    <button class="btn-filter btn-secondary px-4 py-1.5 text-sm" data-filter="Full-Stack">FULL-STACK</button>
+                    <button class="btn-filter active btn-secondary px-4 py-1.5 rounded-full text-sm" data-filter="all">All</button>
+                    <button class="btn-filter btn-secondary px-4 py-1.5 rounded-full text-sm" data-filter="AI & Automation">AI & Automation</button>
+                    <button class="btn-filter btn-secondary px-4 py-1.5 rounded-full text-sm" data-filter="Full-Stack">Full-Stack</button>
                 </div>
                 <div id="portfolio-grid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 </div>
             </div>
         </section>
 
-        <section id="experience" class="py-20 md:py-32 bg-black">
+        <section id="experience" class="py-20 md:py-32 bg-gray-950/50 grid-bg">
             <div class="container mx-auto px-6">
                 <div class="text-center mb-16">
-                    <h2 class="text-3xl md:text-4xl font-bold section-title">[ PROFESSIONAL <span>ENGAGEMENTS</span> ]</h2>
-                    <p class="mt-4 text-lg text-gray-400 max-w-3xl mx-auto">MY CAPABILITIES HAVE BEEN PROVEN THROUGH APPLICATION IN DIVERSE PROFESSIONAL SETTINGS, FROM CONTRIBUTING TO COMMERCIAL AI PRODUCTS TO OPERATING AS AN INDEPENDENT CONSULTANT.</p>
+                    <h2 class="text-3xl md:text-4xl font-bold section-title">Professional <span>Engagements</span></h2>
+                    <p class="mt-4 text-lg text-gray-400 max-w-3xl mx-auto">My capabilities have been proven through application in diverse professional settings, from contributing to commercial AI products to operating as an independent consultant.</p>
                 </div>
                 <div class="max-w-4xl mx-auto">
-                    <div id="experience-list" class="border-l-2 border-orange-500/50"></div>
+                    <div id="experience-list" class="border-l-2 border-gray-700/50"></div>
                 </div>
             </div>
         </section>
 
-        <section id="contact" class="py-20 md:py-32">
+        <section id="contact" class="py-20 md:py-32 grid-bg">
             <div class="container mx-auto px-6 text-center">
-                <h2 class="text-3xl md:text-4xl font-bold section-title">[ LET'S BUILD SOMETHING <span>TOGETHER</span> ]</h2>
-                <p class="mt-4 text-lg text-gray-400 max-w-2xl mx-auto">AVAILABLE FOR FREELANCE PROJECTS AND CONSULTING. WHETHER YOU NEED TO BUILD AN MVP FROM SCRATCH OR CREATE A CUSTOM AI SOLUTION, I CAN HELP TURN YOUR VISION INTO REALITY.</p>
-                <div class="mt-8 max-w-xl mx-auto terminal-panel p-8">
+                <h2 class="text-3xl md:text-4xl font-bold section-title">Let's Build Something <span>Together</span></h2>
+                <p class="mt-4 text-lg text-gray-400 max-w-2xl mx-auto">I'm available for freelance projects and consulting engagements. Whether you need to build an MVP from scratch or create a custom AI solution, I can help turn your vision into reality.</p>
+                <div class="mt-8 max-w-xl mx-auto">
                      <form id="contact-form" class="space-y-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <input type="text" name="name" placeholder="NAME" class="w-full p-3 bg-black border border-orange-500 text-gray-200 focus:outline-none focus:border-orange-300" required>
-                            <input type="email" name="email" placeholder="EMAIL" class="w-full p-3 bg-black border border-orange-500 text-gray-200 focus:outline-none focus:border-orange-300" required>
+                            <input type="text" name="name" placeholder="Your Name" class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 text-gray-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition" required>
+                            <input type="email" name="email" placeholder="Your Email" class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 text-gray-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition" required>
                         </div>
-                        <textarea name="message" placeholder="MESSAGE" rows="5" class="w-full p-3 bg-black border border-orange-500 text-gray-200 focus:outline-none focus:border-orange-300" required></textarea>
-                        <button type="submit" class="w-full md:w-auto btn-primary px-8 py-3 font-bold">SEND MESSAGE</button>
+                        <textarea name="message" placeholder="Your Message" rows="5" class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 text-gray-200 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition" required></textarea>
+                        <button type="submit" class="w-full md:w-auto btn-primary rounded-lg px-8 py-3 font-semibold">Send Message</button>
                     </form>
-                    <p id="form-status" class="mt-4 text-sm text-orange-400"></p>
+                    <p id="form-status" class="mt-4 text-sm"></p>
                 </div>
             </div>
         </section>
     </main>
     
-    <footer class="bg-black border-t border-orange-500/50">
+    <footer class="bg-gray-950 border-t border-gray-800/50">
         <div class="container mx-auto px-6 py-8 text-center">
-            <p class="text-gray-400">&copy; 2025 ISHAM LE TENOUX. ALL RIGHTS RESERVED.</p>
-            <p class="text-sm text-gray-600 mt-2">ARCHITECT OF INTELLIGENT AUTOMATION</p>
+            <p class="text-gray-400">&copy; 2025 Isham Le Tenoux. All rights reserved.</p>
+            <p class="text-sm text-gray-500 mt-2">Architect of Intelligent Automation</p>
         </div>
     </footer>
     
     <div id="modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 modal-bg">
-        <div id="modal-content" class="bg-black w-full max-w-3xl max-h-[90vh] overflow-y-auto relative terminal-panel">
-            <button id="modal-close" class="absolute top-2 right-4 text-orange-500 hover:text-white text-2xl font-bold">X</button>
+        <div id="modal-content" class="bg-gray-900 rounded-lg shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto relative border border-gray-700">
+            <button id="modal-close" class="absolute top-4 right-4 text-gray-500 hover:text-white">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
             <div id="modal-body" class="p-8 md:p-12"></div>
         </div>
     </div>
@@ -348,23 +393,23 @@
             const skills = db.skills[category];
             skills.forEach(skill => {
                 const skillEl = document.createElement('div');
-                skillEl.className = 'p-4 text-center border border-orange-500/50';
+                skillEl.className = 'glass-card p-4 rounded-lg text-center';
                 skillEl.innerHTML = `
-                    <h4 class="font-bold text-md mb-1 text-gray-200">${skill.name}</h4>
-                    <p class="text-xs text-gray-400 normal-case">${skill.desc}</p>
+                    <h4 class="font-semibold text-md mb-1 text-gray-200">${skill.name}</h4>
+                    <p class="text-xs text-gray-400">${skill.desc}</p>
                 `;
                 container.appendChild(skillEl);
             });
         };
         
         const setupSkillTabs = () => {
-            const container = document.getElementById('skill-tabs');
+            const container = document.querySelector('#skills-container .flex-wrap');
             container.innerHTML = '';
             const categories = Object.keys(db.skills);
             categories.forEach((category, index) => {
                 const button = document.createElement('button');
                 button.textContent = category;
-                button.className = 'skill-tab btn-secondary px-3 py-1 text-sm';
+                button.className = 'skill-tab btn-secondary px-4 py-1.5 rounded-full text-sm';
                 if (index === 0) {
                     button.classList.add('active');
                 }
@@ -387,16 +432,16 @@
 
             filteredProjects.forEach(project => {
                 const projectEl = document.createElement('div');
-                projectEl.className = 'portfolio-item terminal-panel overflow-hidden cursor-pointer group';
+                projectEl.className = 'portfolio-item glass-card rounded-xl overflow-hidden cursor-pointer group';
                 projectEl.dataset.id = project.id;
                 projectEl.innerHTML = `
                     <div class="overflow-hidden">
-                        <img src="${project.img}" alt="${project.title}" class="w-full h-48 object-cover grayscale group-hover:grayscale-0 transition-all duration-300">
+                        <img src="${project.img}" alt="${project.title}" class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300">
                     </div>
                     <div class="p-6">
-                        <p class="text-sm font-bold text-orange-400">${project.category}</p>
+                        <p class="text-sm font-semibold text-indigo-400">${project.category}</p>
                         <h3 class="font-bold text-xl mt-1 mb-2 text-white">${project.title}</h3>
-                        <p class="text-gray-400 text-sm normal-case">${project.summary}</p>
+                        <p class="text-gray-400 text-sm">${project.summary}</p>
                     </div>
                 `;
                 grid.appendChild(projectEl);
@@ -422,14 +467,13 @@
                 const expEl = document.createElement('div');
                 expEl.className = 'relative pl-8 sm:pl-12 py-6 group';
                 expEl.innerHTML = `
-                    <div class="flex items-start mb-1 sm:mb-0">
-                         <div class="bg-orange-500 h-3 w-3 absolute left-0 top-8 -translate-x-1/2 transform" style="clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);"></div>
-                        <div>
-                            <h3 class="text-xl font-bold text-white">${exp.role}</h3>
-                            <p class="text-md font-bold text-orange-400 mb-2">${exp.company} // <span class="text-gray-500">${exp.period}</span></p>
-                            <p class="text-gray-400 normal-case">${exp.desc}</p>
-                        </div>
+                    <div class="flex items-center mb-1 sm:mb-0">
+                        <div class="bg-indigo-500 h-4 w-4 rounded-full absolute left-0 -translate-x-1/2 transform ring-4 ring-gray-900 group-hover:ring-indigo-500/20 transition-all"></div>
+                        <h3 class="text-xl font-bold text-white">${exp.role}</h3>
+                        <span class="text-sm font-semibold text-indigo-200 bg-indigo-500/20 px-2 py-0.5 rounded-full ml-4">${exp.period}</span>
                     </div>
+                    <p class="text-md font-semibold text-gray-400 mb-2">${exp.company}</p>
+                    <p class="text-gray-400">${exp.desc}</p>
                 `;
                 container.appendChild(expEl);
             });
@@ -444,19 +488,19 @@
             if (!project) return;
 
             modalBody.innerHTML = `
-                <img src="${project.img}" alt="${project.title}" class="w-full h-64 object-cover mb-6 border border-orange-500">
-                <p class="text-sm font-bold text-orange-400">${project.category}</p>
+                <img src="${project.img}" alt="${project.title}" class="w-full h-64 object-cover rounded-lg mb-6">
+                <p class="text-sm font-semibold text-indigo-400">${project.category}</p>
                 <h2 class="text-3xl font-bold my-2 text-white">${project.title}</h2>
                 <div class="flex flex-wrap gap-2 my-4">
-                    ${project.tech.map(t => `<span class="tag text-xs font-semibold px-2 py-0.5">${t}</span>`).join('')}
+                    ${project.tech.map(t => `<span class="tag text-xs font-semibold px-2.5 py-1 rounded-full">${t}</span>`).join('')}
                 </div>
-                <div class="space-y-6 text-gray-300 mt-6 normal-case">
+                <div class="space-y-6 text-gray-300 mt-6">
                     <div>
-                        <h4 class="font-bold text-lg mb-2 text-orange-400 uppercase">The Challenge</h4>
+                        <h4 class="font-bold text-lg mb-2 text-indigo-400">The Challenge</h4>
                         <p>${project.challenge}</p>
                     </div>
                     <div>
-                        <h4 class="font-bold text-lg mb-2 text-orange-400 uppercase">The Solution</h4>
+                        <h4 class="font-bold text-lg mb-2 text-indigo-400">The Solution</h4>
                         <p>${project.solution}</p>
                     </div>
                 </div>
@@ -514,16 +558,25 @@
                     link.classList.add('active');
                 }
             });
+            
+            const header = document.getElementById('header');
+            if (window.scrollY > 50) {
+                header.classList.add('border-gray-800/50');
+            } else {
+                header.classList.remove('border-gray-800/50');
+            }
         });
         
         const contactForm = document.getElementById('contact-form');
         const formStatus = document.getElementById('form-status');
         contactForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            formStatus.textContent = 'SENDING...';
+            formStatus.textContent = 'Sending...';
+            formStatus.className = 'mt-4 text-sm text-gray-400';
             
             setTimeout(() => {
-                formStatus.textContent = 'MESSAGE SENT. I WILL GET BACK TO YOU SHORTLY.';
+                formStatus.textContent = 'Thank you for your message! I will get back to you shortly.';
+                formStatus.className = 'mt-4 text-sm text-green-400';
                 contactForm.reset();
             }, 1000);
         });
@@ -533,17 +586,17 @@
             new Chart(ctx, {
                 type: 'radar',
                 data: {
-                    labels: ['FULL-STACK DEV', 'AI AGENTS', 'AUTOMATION'],
+                    labels: ['Full-Stack Dev', 'AI Agents', 'Automation'],
                     datasets: [{
-                        label: 'PROFICIENCY',
+                        label: 'Proficiency & Focus',
                         data: [90, 95, 98],
-                        backgroundColor: 'rgba(255, 153, 0, 0.2)',
-                        borderColor: 'rgba(255, 153, 0, 1)',
-                        borderWidth: 1,
-                        pointBackgroundColor: 'rgba(255, 153, 0, 1)',
-                        pointBorderColor: '#000',
-                        pointHoverBackgroundColor: '#000',
-                        pointHoverBorderColor: 'rgba(255, 153, 0, 1)'
+                        backgroundColor: 'rgba(79, 70, 229, 0.2)',
+                        borderColor: 'rgba(99, 102, 241, 1)',
+                        borderWidth: 2,
+                        pointBackgroundColor: 'rgba(99, 102, 241, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(99, 102, 241, 1)'
                     }]
                 },
                 options: {
@@ -551,15 +604,15 @@
                     maintainAspectRatio: false,
                     scales: {
                         r: {
-                            angleLines: { color: 'rgba(255, 153, 0, 0.3)' },
-                            grid: { color: 'rgba(255, 153, 0, 0.3)' },
+                            angleLines: { color: 'rgba(55, 65, 81, 0.5)' },
+                            grid: { color: 'rgba(55, 65, 81, 0.5)' },
                             pointLabels: {
-                                font: { size: 12, weight: '700' },
-                                color: '#E0E0E0'
+                                font: { size: 12, weight: '500' },
+                                color: '#d1d5db'
                             },
                             ticks: {
                                 backdropColor: 'transparent',
-                                color: 'rgba(255, 153, 0, 0.7)',
+                                color: 'rgba(156, 163, 175, 0.5)',
                                 stepSize: 25,
                                 display: false
                             },
