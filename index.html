@@ -362,6 +362,25 @@
     
     <script>
     document.addEventListener('DOMContentLoaded', () => {
+        
+        // Track page visits
+        const params = new URLSearchParams(window.location.search);
+        const name = params.get("name");
+        const isTest = params.get("test");
+
+        // Prevent logging if you're testing
+        if (name && !isTest) {
+          fetch("https://hook.eu2.make.com/8rxh898k8pux2xq4ln1uusbnmk195boj", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              name: name,
+              timestamp: new Date().toISOString()
+            })
+          }).catch(error => {
+            console.error('Tracking error:', error);
+          });
+        }
 
         const db = {
             portfolio: [
