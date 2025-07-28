@@ -566,7 +566,7 @@
         };
 
         const showVideoIfAvailable = (lead) => {
-            if (lead && lead.loom) {
+            if (lead && lead.loom && typeof lead.loom === "string" && lead.loom.trim() !== "") {
                 const videoSection = document.getElementById('video-message');
                 const videoContainer = document.getElementById('video-container');
                 
