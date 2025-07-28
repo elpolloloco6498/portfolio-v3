@@ -186,19 +186,17 @@
         </section>
 
         <!-- Video Message Section -->
-        <!-- <section id="video-message" class="py-20 md:py-32 grid-bg">
+        <section id="video-message" class="py-20 md:py-32 grid-bg" style="display: none;">
             <div class="container mx-auto px-6">
                  <div class="text-center mb-16">
                     <h2 class="text-3xl md:text-4xl font-bold section-title">A Personal Message <span>For You</span></h2>
                     <p class="mt-4 text-lg text-gray-400 max-w-3xl mx-auto">Sometimes it's easier to show than to tell. Here's a short video where I explain my approach.</p>
                 </div>
                 <div class="max-w-4xl mx-auto">
-                    <div class="aspect-w-16 aspect-h-9 rounded-xl overflow-hidden shadow-2xl border border-gray-800">
-                        <iframe src="https://www.veed.io/view/87f58b0d-90a9-47fb-88d4-9ce4dd527e0a" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
-                    </div>
+                        <div id="video-container" style="position: relative; padding-bottom: 75%; height: 0;"></div>
                 </div>
             </div>
-        </section> -->
+        </section>
 
         <!-- What We Can Build Section -->
         <section id="possibilities" class="py-20 md:py-32 bg-gray-950/50 grid-bg">
@@ -509,6 +507,7 @@
                     
                     personalizeContent(lead);
                     hideContactFormFields();
+                    showVideoIfAvailable(lead);
                 }
             } catch (error) {
                 console.error('Error fetching lead data:', error);
@@ -544,6 +543,21 @@
                 const emailInput = nameEmailFields.querySelector('input[name="email"]');
                 if (nameInput) nameInput.removeAttribute('required');
                 if (emailInput) emailInput.removeAttribute('required');
+            }
+        };
+
+        const showVideoIfAvailable = (lead) => {
+            if (lead && lead.loom) {
+                const videoSection = document.getElementById('video-message');
+                const videoContainer = document.getElementById('video-container');
+                
+                if (videoSection && videoContainer) {
+                    // Show the video section
+                    videoSection.style.display = 'block';
+                    
+                    // Create the iframe with the lead's loom URL
+                    videoContainer.innerHTML = `<iframe src="${lead.loom}" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;"></iframe>`;
+                }
             }
         };
 
